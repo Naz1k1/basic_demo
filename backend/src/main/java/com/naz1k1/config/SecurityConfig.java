@@ -43,8 +43,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .antMatchers("/api/auth/**").permitAll()  // 登录相关接口允许匿名访问
+                .antMatchers("/api/user/**").authenticated()  // 用户相关接口需要认证
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -68,15 +68,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     response.setContentType("application/json;charset=utf-8");
                     response.getWriter().write(objectMapper.writeValueAsString(
                             Result.success("注销成功")
-                    ));
-                })
-                .and()
-                .sessionManagement()
-                .maximumSessions(1)
-                .expiredSessionStrategy(event -> {
-                    event.getResponse().setContentType("application/json;charset=utf-8");
-                    event.getResponse().getWriter().write(objectMapper.writeValueAsString(
-                            Result.fail("账号已在其他地方登录")
                     ));
                 });
     }

@@ -33,7 +33,7 @@ const isCollapse = ref(false)
           <el-icon><Location /></el-icon>
           <span>系统管理</span>
         </template>
-        <el-menu-item index="/system/user">用户管理</el-menu-item>
+        <el-menu-item index="/users">用户管理</el-menu-item>
         <el-menu-item index="/role">角色管理</el-menu-item>
       </el-sub-menu>
 

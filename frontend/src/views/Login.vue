@@ -42,7 +42,7 @@ const handleLogin = async () => {
       const userInfo = await authApi.getCurrentUser()
       if (userInfo.data.code === 200) {
         // 这里可以存储用户信息到vuex或pinia
-        await router.push('/users')
+        await router.push('/dashboard')
       }
     } else {
       ElMessage.error(res.data.message || '登录失败')

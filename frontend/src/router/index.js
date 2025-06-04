@@ -1,54 +1,45 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from "../views/Login.vue";
 import MainLayout from "../layouts/MainLayout.vue";
+import { authApi } from '../api/auth'
 
 const routes = [
     {
         path: '/',
-        component: MainLayout,
-        redirect: '/dashboard',
-        children: [
-            {
-                path: 'dashboard',
-                name: 'Dashboard',
-                component: () => import('../views/Dashboard.vue'),
-                meta: { title: '仪表盘' }
-            },
-            // 系统管理
-            {
-                path: 'system',
-                name: 'System',
-                redirect: '/system/user',
-                meta: { title: '系统管理' },
-                children: [
-                    {
-                        path: 'user',
-                        name: 'User',
-                        component: () => import('../views/system/User.vue'),
-                        meta: { title: '用户管理' }
-                    },
-                    // {
-                    //     path: 'role',
-                    //     name: 'Role',
-                    //     component: () => import('../views/system/Role.vue'),
-                    //     meta: { title: '角色管理' }
-                    // }
-                ]
-            },
-            // // 系统设置
-            // {
-            //     path: 'settings',
-            //     name: 'Settings',
-            //     component: () => import('../views/Settings.vue'),
-            //     meta: { title: '系统设置' }
-            // }
-        ]
+        redirect: '/Login'
     },
     {
         path: '/login',
         name: 'Login',
         component: Login,
-        meta: { title: '登录' }
+        meta: { 
+            title: '登录',
+            requiresAuth: false
+        }
+    },
+    {
+        path: '/',
+        component: MainLayout,
+        children: [
+            {
+                path: 'dashboard',
+                name: 'Dashboard',
+                component: () => import('../views/Dashboard.vue'),
+                meta: { 
+                    title: '仪表盘',
+                    requiresAuth: true
+                }
+            },
+            {
+                path: 'users',
+                name: 'users',
+                component: () => import('../views/system/user.vue'),
+                meta: { 
+                    title: '用户管理',
+                    requiresAuth: true
+                }
+            }
+        ]
     }
 ]
 
@@ -58,19 +49,34 @@ const router = createRouter({
 })
 
 // 全局前置守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     // 设置页面标题
     document.title = to.meta.title ? `${to.meta.title} - 后台管理系统` : '后台管理系统'
     
-    // 这里可以添加登录验证等逻辑
-    // const token = localStorage.getItem('token')
-    // if (!token && to.path !== '/login') {
-    //     next('/login')
-    // } else {
-    //     next()
-    // }
-    
-    next()
+    // 判断该路由是否需要登录权限
+    if (to.meta.requiresAuth === false) {
+        next()
+        return
+    }
+
+    try {
+        // 获取当前登录用户信息
+        const res = await authApi.getCurrentUser()
+        if (res.data.code === 200) {
+            next()
+        } else {
+            next({
+                path: '/login',
+                query: { redirect: to.fullPath }
+            })
+        }
+    } catch (error) {
+        console.error('验证用户登录状态失败:', error)
+        next({
+            path: '/login',
+            query: { redirect: to.fullPath }
+        })
+    }
 })
 
 export default router

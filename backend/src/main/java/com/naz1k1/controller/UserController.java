@@ -1,11 +1,15 @@
 package com.naz1k1.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.naz1k1.entity.User;
 import com.naz1k1.model.Result;
 import com.naz1k1.model.request.dto.AddUserDTO;
 import com.naz1k1.model.request.dto.UpdateUserDTO;
 import com.naz1k1.service.UserService;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/api/user")
@@ -17,47 +21,43 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/add")
-    public Result<?> addUser(@RequestBody AddUserDTO dto) {
-        if (userService.addUser(dto)) {
-            return Result.success();
-        }
-        return Result.fail();
+    @PostMapping
+    public Result<Boolean> addUser(@RequestBody @Valid AddUserDTO dto) {
+        boolean success = userService.addUser(dto);
+        return Result.success(success);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public Result<?> deleteUser(@PathVariable Integer id) {
-        if (userService.deleteUser(id)) {
-            return Result.success();
-        }
-        return Result.fail();
+    @DeleteMapping("/{id}")
+    public Result<Boolean> deleteUser(@PathVariable("id") @Min(1) Integer id) {
+        boolean success = userService.deleteUser(id);
+        return Result.success(success);
     }
 
-    @PutMapping("/update")
-    public Result<?> updateUser(@RequestBody UpdateUserDTO dto) {
-        if (userService.updateUser(dto)) {
-            return Result.success();
-        }
-        return Result.fail();
+    @PutMapping
+    public Result<Boolean> updateUser(@RequestBody @Valid UpdateUserDTO dto) {
+        boolean success = userService.updateUser(dto);
+        return Result.success(success);
     }
 
-    @GetMapping("/get/{id}")
-    public Result<?> getById(@PathVariable Integer id) {
+    @GetMapping("/{id}")
+    public Result<User> getUser(@PathVariable("id") @Min(1) Integer id) {
         User user = userService.getById(id);
-        if (user != null) {
-            return Result.success(user);
-        }
-        return Result.fail();
+        return Result.success(user);
     }
 
-    @GetMapping("/get/page")
-    public Result<?> getByPage(@RequestParam(defaultValue = "1") Integer pageNum,
-                                  @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(userService.page(pageNum,pageSize));
+    @GetMapping("/page")
+    public Result<Page<User>> page(
+            @RequestParam(defaultValue = "1") @Min(1) Integer pageNum,
+            @RequestParam(defaultValue = "10") @Min(1) Integer pageSize) {
+        Page<User> page = userService.page(pageNum, pageSize);
+        return Result.success(page);
     }
 
-    @GetMapping("/get/username")
-    public Result<?> getByUsername(@RequestParam String username) {
-        return Result.success(userService.getByUsername(username));
+    @PutMapping("/{id}/status")
+    public Result<Boolean> updateStatus(
+            @PathVariable("id") @Min(1) Integer id,
+            @RequestParam @Min(0) Integer status) {
+        boolean success = userService.updateStatus(id, status);
+        return Result.success(success);
     }
 }

@@ -33,7 +33,7 @@ const handleLogin = async () => {
     const res = await authApi.login(loginForm.username, loginForm.password)
     if (res.data.code === 200) {
       ElMessage.success('登录成功')
-      router.push('/users')
+      await router.push('/users')
     } else {
       ElMessage.error(res.data.msg || '登录失败')
     }

@@ -7,21 +7,27 @@ import com.naz1k1.mapper.UserMapper;
 import com.naz1k1.model.request.dto.AddUserDTO;
 import com.naz1k1.model.request.dto.UpdateUserDTO;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ *
+ */
 @Service
 public class UserService {
 
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserMapper userMapper) {
+    public UserService(UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public boolean addUser(AddUserDTO dto) {
         User user = new User();
         BeanUtils.copyProperties(dto,user,"password");
-        user.setPasswordHash(dto.getPassword());
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         return userMapper.insert(user) > 0;
     }
 
@@ -32,7 +38,7 @@ public class UserService {
     public boolean updateUser(UpdateUserDTO dto) {
         User user = new User();
         BeanUtils.copyProperties(dto,user,"password");
-        user.setPasswordHash(dto.getPassword());
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         return userMapper.updateById(user) > 0;
     }
 

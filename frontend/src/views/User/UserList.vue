@@ -84,7 +84,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { userApi } from '../api/user.js'
+import { userApi } from '../../api/user.js'
 
 // 数据状态
 const loading = ref(false)

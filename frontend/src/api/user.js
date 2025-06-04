@@ -9,23 +9,27 @@ const api = axios.create({
 })
 
 export const userApi = {
-    getUsers(pageNum = 1,pageSize = 10) {
-        return api.get(`/user/get/page?pageNum=${pageNum}&pageSize=${pageSize}`)
+    getUsers(pageNum = 1, pageSize = 10) {
+        return api.get(`/users/page?pageNum=${pageNum}&pageSize=${pageSize}`)
     },
 
-    addUser(data) {
-        return api.post(`/user/add`, data)
+    createUser(data) {
+        return api.post('/users', data)
     },
 
     deleteUser(id) {
-        return api.delete(`/user/delete/${id}`)
+        return api.delete(`/users/${id}`)
     },
 
     updateUser(data) {
-        return api.put(`/user/update`,data)
+        return api.put('/users', data)
     },
 
     getUserById(id) {
-        return api.get(`/user/get/${id}`)
+        return api.get(`/users/${id}`)
+    },
+
+    updateUserStatus(id, status) {
+        return api.put(`/users/${id}/status`, { status })
     }
 }

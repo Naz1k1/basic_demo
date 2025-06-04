@@ -2,22 +2,26 @@ import axios from 'axios'
 
 const api = axios.create({
     baseURL: 'http://localhost:8080/api',
-    withCredentials: true
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json'
+    }
 })
 
 export const authApi = {
-    login(username, password) {
-        const formData = new FormData()
-        formData.append('username', username)
-        formData.append('password', password)
-        return api.post('/auth/login', formData)
+    login(username, password, rememberMe = false) {
+        return api.post('/auth/login', {
+            username,
+            password,
+            rememberMe
+        })
     },
 
     logout() {
         return api.post('/auth/logout')
     },
 
-    getUserInfo() {
-        return api.get('/auth/info')
+    getCurrentUser() {
+        return api.get('/auth/current')
     }
 }

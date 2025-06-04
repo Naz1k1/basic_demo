@@ -27,6 +27,13 @@
                 type="danger"
                 @click="handleDelete(scope.row)"
             >删除</el-button>
+            <el-button
+                size="small"
+                :type="scope.row.status === 1 ? 'warning' : 'success'"
+                @click="handleStatusChange(scope.row)"
+            >
+              {{ scope.row.status === 1 ? '禁用' : '启用' }}
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -192,6 +199,23 @@ const handleDelete = (row) => {
   })
 }
 
+// 处理状态变更
+const handleStatusChange = async (row) => {
+  try {
+    const newStatus = row.status === 1 ? 0 : 1
+    const res = await userApi.updateUserStatus(row.userId, newStatus)
+    if (res.data.code === 200) {
+      ElMessage.success(`${newStatus === 1 ? '启用' : '禁用'}成功`)
+      await getUserList()
+    } else {
+      ElMessage.error(res.data.message || '操作失败')
+    }
+  } catch (error) {
+    console.error('更新用户状态失败:', error)
+    ElMessage.error('更新用户状态失败')
+  }
+}
+
 // 提交表单
 const handleSubmit = async () => {
   if (!formRef.value) return
@@ -199,14 +223,14 @@ const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        const api = formType.value === 'add' ? userApi.addUser : userApi.updateUser
+        const api = formType.value === 'add' ? userApi.createUser : userApi.updateUser
         const res = await api(form.value)
         if (res.data.code === 200) {
           ElMessage.success(formType.value === 'add' ? '添加成功' : '更新成功')
           dialogVisible.value = false
           getUserList()
         } else {
-          ElMessage.error(res.data.msg || (formType.value === 'add' ? '添加失败' : '更新失败'))
+          ElMessage.error(res.data.message || (formType.value === 'add' ? '添加失败' : '更新失败'))
         }
       } catch (error) {
         console.error(formType.value === 'add' ? '添加用户失败:' : '更新用户失败:', error)

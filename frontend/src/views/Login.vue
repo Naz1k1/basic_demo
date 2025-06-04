@@ -7,11 +7,12 @@ import { authApi } from '../api/auth'
 const router = useRouter()
 const loginForm = reactive({
   username: '',
-  password: ''
+  password: '',
+  rememberMe: false
 })
 
 const loading = ref(false)
-const loginFormRef = ref(null) // 添加这行
+const loginFormRef = ref(null)
 
 const rules = {
   username: [
@@ -26,16 +27,25 @@ const handleLogin = async () => {
   if (!loginFormRef.value) return
 
   try {
-    // 表单验证
     await loginFormRef.value.validate()
 
     loading.value = true
-    const res = await authApi.login(loginForm.username, loginForm.password)
+    const res = await authApi.login(
+      loginForm.username,
+      loginForm.password,
+      loginForm.rememberMe
+    )
+    
     if (res.data.code === 200) {
       ElMessage.success('登录成功')
-      await router.push('/users')
+      // 获取用户信息
+      const userInfo = await authApi.getCurrentUser()
+      if (userInfo.data.code === 200) {
+        // 这里可以存储用户信息到vuex或pinia
+        await router.push('/users')
+      }
     } else {
-      ElMessage.error(res.data.msg || '登录失败')
+      ElMessage.error(res.data.message || '登录失败')
     }
   } catch (error) {
     console.error('登录失败:', error)
@@ -73,6 +83,9 @@ const handleLogin = async () => {
           />
         </el-form-item>
         <el-form-item>
+          <el-checkbox v-model="loginForm.rememberMe">记住我</el-checkbox>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" @click="handleLogin" :loading="loading">
             登录
           </el-button>
@@ -97,5 +110,9 @@ const handleLogin = async () => {
 
 .el-button {
   width: 100%;
+}
+
+.el-checkbox {
+  margin-left: 0;
 }
 </style>
